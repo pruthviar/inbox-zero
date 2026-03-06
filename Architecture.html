@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inbox Zero Technical Architecture</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b1020;
+        --card: #111831;
+        --text: #e6eaf6;
+        --muted: #a6b0d1;
+        --line: #4f6bc6;
+        --accent: #7aa2ff;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: linear-gradient(180deg, #070b17, #0b1020);
+        color: var(--text);
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      h1 {
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        margin-top: 0;
+        color: var(--muted);
+      }
+      .panel {
+        background: rgba(17, 24, 49, 0.8);
+        border: 1px solid rgba(122, 162, 255, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .legend a,
+      .links a {
+        color: #b9cbff;
+        text-decoration: none;
+      }
+      .legend a:hover,
+      .links a:hover {
+        text-decoration: underline;
+      }
+      .links {
+        margin-top: 24px;
+      }
+      .links ul {
+        line-height: 1.7;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+      }
+      .node {
+        fill: #172344;
+        stroke: #7aa2ff;
+        stroke-width: 1.5;
+        rx: 10;
+      }
+      .external {
+        fill: #2a2143;
+        stroke: #b08fff;
+      }
+      .label {
+        fill: #e8eeff;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .sublabel {
+        fill: #b4c2eb;
+        font-size: 12px;
+      }
+      .edge {
+        stroke: #6d8de8;
+        stroke-width: 1.5;
+        marker-end: url(#arrow);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Inbox Zero — Technical Architecture Diagram</h1>
+      <p class="subtitle">
+        Monorepo architecture for the Next.js web app, unsubscribe worker, shared packages, and
+        external integrations.
+      </p>
+
+      <div class="panel">
+        <svg viewBox="0 0 1200 760" role="img" aria-label="Inbox Zero architecture diagram">
+          <defs>
+            <marker
+              id="arrow"
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="7"
+              markerHeight="7"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#6d8de8"></path>
+            </marker>
+          </defs>
+
+          <a href="./apps/web">
+            <rect class="node" x="60" y="80" width="300" height="120"></rect>
+            <text class="label" x="80" y="118">apps/web</text>
+            <text class="sublabel" x="80" y="143">Next.js App Router (UI + API + actions)</text>
+            <text class="sublabel" x="80" y="165">Auth, Gmail workflows, AI orchestration</text>
+          </a>
+
+          <a href="./apps/unsubscriber">
+            <rect class="node" x="60" y="260" width="300" height="120"></rect>
+            <text class="label" x="80" y="298">apps/unsubscriber</text>
+            <text class="sublabel" x="80" y="323">Fastify + Playwright automation service</text>
+            <text class="sublabel" x="80" y="345">Bulk newsletter unsubscribe pipeline</text>
+          </a>
+
+          <a href="./packages">
+            <rect class="node" x="450" y="80" width="300" height="120"></rect>
+            <text class="label" x="470" y="118">packages/*</text>
+            <text class="sublabel" x="470" y="143">Shared SDK wrappers & configuration</text>
+            <text class="sublabel" x="470" y="165">tinybird, resend, loops, slack, tsconfig</text>
+          </a>
+
+          <a href="./apps/web/prisma">
+            <rect class="node" x="450" y="260" width="300" height="120"></rect>
+            <text class="label" x="470" y="298">Prisma + PostgreSQL</text>
+            <text class="sublabel" x="470" y="323">User data, rules, metadata, jobs</text>
+            <text class="sublabel" x="470" y="345">Schema + migrations in apps/web/prisma</text>
+          </a>
+
+          <a href="./apps/web/utils/redis">
+            <rect class="node" x="450" y="440" width="300" height="120"></rect>
+            <text class="label" x="470" y="478">Redis / Queue Layer</text>
+            <text class="sublabel" x="470" y="503">Caching + background coordination</text>
+            <text class="sublabel" x="470" y="525">Queue & dedupe logic under utils/redis, utils/queue</text>
+          </a>
+
+          <rect class="node external" x="840" y="80" width="300" height="120"></rect>
+          <text class="label" x="860" y="118">Google APIs</text>
+          <text class="sublabel" x="860" y="143">Gmail, Calendar, People, Drive</text>
+          <text class="sublabel" x="860" y="165">Inbound webhooks + outbound actions</text>
+
+          <rect class="node external" x="840" y="260" width="300" height="120"></rect>
+          <text class="label" x="860" y="298">LLM Providers</text>
+          <text class="sublabel" x="860" y="323">OpenAI, Anthropic, Google, Groq, Bedrock</text>
+          <text class="sublabel" x="860" y="345">Rule selection, generation, summarization</text>
+
+          <rect class="node external" x="840" y="440" width="300" height="120"></rect>
+          <text class="label" x="860" y="478">Observability & Billing</text>
+          <text class="sublabel" x="860" y="503">Tinybird, PostHog, Sentry, LemonSqueezy</text>
+          <text class="sublabel" x="860" y="525">Metrics, product analytics, payments</text>
+
+          <line class="edge" x1="360" y1="140" x2="450" y2="140"></line>
+          <line class="edge" x1="360" y1="320" x2="450" y2="320"></line>
+          <line class="edge" x1="360" y1="140" x2="450" y2="320"></line>
+          <line class="edge" x1="360" y1="320" x2="450" y2="500"></line>
+          <line class="edge" x1="750" y1="140" x2="840" y2="140"></line>
+          <line class="edge" x1="750" y1="320" x2="840" y2="320"></line>
+          <line class="edge" x1="750" y1="500" x2="840" y2="500"></line>
+          <line class="edge" x1="360" y1="140" x2="840" y2="320"></line>
+        </svg>
+      </div>
+
+      <div class="legend">
+        <div><strong>Internal service</strong>: blue node</div>
+        <div><strong>External dependency</strong>: purple node</div>
+        <div><strong>Arrows</strong>: primary request or data flow</div>
+      </div>
+
+      <section class="links panel">
+        <h2>Architecture Links</h2>
+        <ul>
+          <li><a href="./ARCHITECTURE.md">Repository architecture overview (Markdown)</a></li>
+          <li><a href="./apps/web/app">Web app routes and API endpoints</a></li>
+          <li><a href="./apps/web/utils/actions">Server actions</a></li>
+          <li><a href="./apps/web/utils/ai">AI orchestration modules</a></li>
+          <li><a href="./apps/web/utils/gmail">Gmail integration layer</a></li>
+          <li><a href="./apps/unsubscriber/src">Unsubscriber worker source</a></li>
+          <li><a href="./packages/tinybird">Tinybird analytics package</a></li>
+          <li><a href="./docker">Containerization and deployment config</a></li>
+        </ul>
+      </section>
+    </div>
+  </body>
+</html>
